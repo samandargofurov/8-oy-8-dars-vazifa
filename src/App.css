@@ -1,0 +1,13 @@
+.active {
+    background-color: blue;
+    padding: 6px 15px;
+    border-radius: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+p {
+    font-weight: 500;
+    color: rgba(63, 63, 63, 0.763);
+    font-weight: bold;
+}
