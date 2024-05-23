@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import data_json from '../assets/data.json'
+import data_json from '../assets/data.json';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,28 +32,26 @@ export const options = {
 };
 
 export default function Hour() {
-  const [ dataChart, setDataChart ] = useState([])
+  const [dataChart, setDataChart] = useState({ labels: [], datasets: [] });
 
-  function timeConverter(time){
-    var a = new Date(time);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    return time;  
+  function timeConverter(time) {
+    const a = new Date(time);
+    const hour = a.getHours();
+    const period = hour >= 12 ? "PM" : "AM"; // Determine AM or PM
+    const formattedHour = hour % 12; // Convert 24-hour format to 12-hour format
+    return `${formattedHour} ${period}`;
   }
 
   useEffect(() => {
-    let labels = [];
-    let values = [];
+    const labels = [];
+    const values = [];
 
-    data_json.rates.forEach((el, index) => {
-      labels.push(timeConverter(data_json.startTime + index + data_json.interval));
-      values.push(el)
+    data_json[0].rates.forEach((el, index) => {
+      // Only add label if it's a 12-hour interval
+      if (index % 6 == 0) {
+        labels.push(timeConverter(data_json[0].startTime + (index * data_json[0].interval)));
+        values.push(el);
+      }
     });
 
     setDataChart({
@@ -68,15 +66,11 @@ export default function Hour() {
       ],
     });
 
-  }, [])
+  }, []);
 
   return (
-    <>
-      <div>
-        {
-          dataChart?.labels?.length && <Line options={options} data={dataChart} />
-        }
-      </div>
-    </>
+    <div className="mx-auto w-[1100px]">
+      {dataChart?.labels?.length && <Line options={options} data={dataChart} />}
+    </div>
   );
 }

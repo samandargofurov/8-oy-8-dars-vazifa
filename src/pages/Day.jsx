@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import data_json from '../assets/data.json'
+import data_json from '../assets/data.json';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,30 +31,33 @@ export const options = {
   },
 };
 
-export default function Day() {
-  const [ dataChart, setDataChart ] = useState([])
+export default function Hour() {
+  const [dataChart, setDataChart] = useState({ labels: [], datasets: [] });
 
-  function timeConverter(time){
-    var a = new Date(time);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    return time;  
+  function timeConverter(time) {
+    const a = new Date(time);
+    const hour = a.getHours();
+    return `${hour}:00`;
   }
 
   useEffect(() => {
-    let labels = [];
-    let values = [];
+    const labels = [];
+    const values = [];
+    const interval = 60 * 60 * 1000; // 1 hour in milliseconds
+    const oneDayInterval = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
-    data_json.rates.forEach((el, index) => {
-      labels.push(timeConverter(data_json.startTime + index + data_json.interval));
-      values.push(el)
+    data_json[0].rates.forEach((el, index) => {
+      // Only add label if it's a 1-hour interval
+      if (index % (interval / data_json[0].interval) === 0) {
+        const timestamp = data_json[0].startTime + (index * data_json[0].interval);
+        labels.push(timeConverter(timestamp));
+        values.push(el);
+      }
     });
+
+    // Add label for the end of the day
+    const lastTimestamp = data_json[0].startTime + (data_json[0].rates.length - 1) * data_json[0].interval;
+    labels.push(timeConverter(lastTimestamp + oneDayInterval));
 
     setDataChart({
       labels,
@@ -68,15 +71,15 @@ export default function Day() {
       ],
     });
 
-  }, [])
+  }, []);
 
   return (
-    <>
-      <div>
-        {
-          dataChart?.labels?.length && <Line options={options} data={dataChart} />
-        }
-      </div>
-    </>
+    <div className="mx-auto w-[1100px]">
+      {dataChart?.labels?.length ? (
+        <Line options={options} data={dataChart} />
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
   );
 }

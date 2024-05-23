@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import data_json from '../assets/data.json'
+import data_json from '../assets/data.json';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,39 +22,35 @@ ChartJS.register(
   Legend
 );
 
-export const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: "top",
-    },
-  },
-};
+export default function Hour() {
+  const [dataChart, setDataChart] = useState({ labels: [], datasets: [] });
 
-export default function Week() {
-  const [ dataChart, setDataChart ] = useState([])
-
-  function timeConverter(time){
-    var a = new Date(time);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    return time;  
+  function timeConverter(time) {
+    const a = new Date(time);
+    const date = a.getDate();
+    const month = a.toLocaleString('default', { month: 'short' });
+    const hour = a.getHours();
+    return `${month} ${date}, ${hour}:00`;
   }
 
   useEffect(() => {
-    let labels = [];
-    let values = [];
+    const labels = [];
+    const values = [];
+    const oneDayInterval = 12 * 60 * 10 * 10000; // 1 day in milliseconds
+    const oneWeekInterval = 21 * oneDayInterval; // 1 week in milliseconds
 
-    data_json.rates.forEach((el, index) => {
-      labels.push(timeConverter(data_json.startTime + index + data_json.interval));
-      values.push(el)
+    data_json[0].rates.forEach((el, index) => {
+      // Only add label if it's the first day of the week
+      if (index % (oneWeekInterval / data_json[0].interval) === 0) {
+        const timestamp = data_json[0].startTime + (index * data_json[0].interval);
+        labels.push(timeConverter(timestamp));
+        values.push(el);
+      }
     });
+
+    // Add label for the end of the week
+    const lastTimestamp = data_json[0].startTime + (data_json[0].rates.length - 1) * data_json[0].interval;
+    labels.push(timeConverter(lastTimestamp + oneWeekInterval));
 
     setDataChart({
       labels,
@@ -68,15 +64,15 @@ export default function Week() {
       ],
     });
 
-  }, [])
+  }, []);
 
   return (
-    <>
-      <div>
-        {
-          dataChart?.labels?.length && <Line options={options} data={dataChart} />
-        }
-      </div>
-    </>
+    <div className="mx-auto w-[1100px]">
+      {dataChart?.labels?.length ? (
+        <Line data={dataChart} />
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
   );
 }

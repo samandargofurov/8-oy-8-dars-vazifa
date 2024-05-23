@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import data_json from '../assets/data.json'
+import data_json from '../assets/data.json';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,34 +26,32 @@ export const options = {
   responsive: true,
   plugins: {
     legend: {
-      position: "top",
+      position: "bottom",
     },
   },
 };
 
-export default function TwoYears() {
-  const [ dataChart, setDataChart ] = useState([])
+export default function Hour() {
+  const [dataChart, setDataChart] = useState({ labels: [], datasets: [] });
 
-  function timeConverter(time){
-    var a = new Date(time);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    return time;  
+  function timeConverter(time) {
+    const a = new Date(time * 1.18);
+    const month = a.toLocaleString('default', { month: 'short' });
+    const year = a.getFullYear();
+    return `${month} ${year}`;
   }
 
   useEffect(() => {
-    let labels = [];
-    let values = [];
+    const labels = [];
+    const values = [];
+    const interval = 30 * 60 * 60 * 1000; // 30 days in milliseconds
 
-    data_json.rates.forEach((el, index) => {
-      labels.push(timeConverter(data_json.startTime + index + data_json.interval));
-      values.push(el)
+    data_json[1].rates.forEach((el, index) => {
+      // Only add label if it's a 1-month interval
+      if (index % (interval / data_json[1].interval) == 0) {
+        labels.push(timeConverter(data_json[1].startTime + (index * data_json[1].interval)));
+        values.push(el);
+      }
     });
 
     setDataChart({
@@ -68,15 +66,11 @@ export default function TwoYears() {
       ],
     });
 
-  }, [])
+  }, []);
 
   return (
-    <>
-      <div>
-        {
-          dataChart?.labels?.length && <Line options={options} data={dataChart} />
-        }
-      </div>
-    </>
+    <div className="mx-auto w-[1100px]">
+      {dataChart?.labels?.length && <Line options={options} data={dataChart} />}
+    </div>
   );
 }
