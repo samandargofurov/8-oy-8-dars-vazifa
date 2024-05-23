@@ -1,12 +1,12 @@
 import { NavLink, Route, Routes } from "react-router-dom"
-import Hour from "../pages/Hour"
-import Day from "../pages/Day"
-import TwoYears from "../pages/TwoYears"
-import OneYears from "../pages/OneYear"
-import Month from "../pages/Month"
-import Week from "../pages/Week"
-import FiveYears from "../pages/FiveYears"
-import TenYears from "../pages/TenYears"
+import Hour from "./pages/Hour"
+import Day from "./pages/Day"
+import TwoYears from "./pages/TwoYears"
+import OneYears from "./pages/OneYear"
+import Month from "./pages/Month"
+import Week from "./pages/Week"
+import FiveYears from "./pages/FiveYears"
+import TenYears from "./pages/TenYears"
 import './App.css'
 
 function App() {
